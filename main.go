@@ -2,11 +2,31 @@ package main
 
 import (
 	"log"
-
 	"github.com/yanple/vk_api"
+	"encoding/json"
+	"os"
 )
 
+var configuration struct {
+	DBConfig    map[string]string `json:"DBConfig"`
+	CountGoroutine int `json:"CountGoroutine"`
+	Tokens []string `json:"Tokens"`
+}
+
 func main() {
+
+	configFile, err := os.Open("config.json")
+	if err != nil {
+		log.Println("opening config file", err.Error())
+	}
+
+	jsonParser := json.NewDecoder(configFile)
+	if err = jsonParser.Decode(&configuration); err != nil {
+		log.Println("parsing config file", err.Error())
+	}
+
+	log.Println(configuration.Tokens)
+
 	// Login/pass auth
 	var api = &vk_api.Api{}
 	//api.AccessToken = ""
