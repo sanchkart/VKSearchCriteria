@@ -15,7 +15,7 @@ type Configuration struct {
 	Tokens []string `json:"Tokens"`
 }
 
-type VKGroupData struct {
+type VKGroupIDData struct {
 	Response struct {
 			 Count int   `json:"count"`
 			 Users []int `json:"users"`
@@ -25,11 +25,11 @@ type VKGroupData struct {
 func main() {
 
 	log.Println(loadConfiguration())
-	log.Print(getVKGroupID("cat_programming","id_asc","0","100"))
+	log.Print(getVKGroupIDs("cat_programming","id_asc","0","100"))
 
 }
 
-func getVKGroupID(groupID,sort,offset,count string) VKGroupData{
+func getVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
 	// Login/pass auth
 	//api.AccessToken = ""
 
@@ -54,7 +54,7 @@ func getVKGroupID(groupID,sort,offset,count string) VKGroupData{
 		panic(err)
 	}
 
-	var data VKGroupData
+	var data VKGroupIDData
 	if err := json.Unmarshal([]byte(strResp),&data); err != nil {
 		log.Println("Parsing VK GetMembers error:", err.Error())
 	}
