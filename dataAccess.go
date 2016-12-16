@@ -29,8 +29,8 @@ func (s Story) String() string {
 
 func createSchema(db *pg.DB) error {
 	queries := []string{
-		`CREATE TEMP TABLE users (id serial, name text, emails jsonb)`,
-		`CREATE TEMP TABLE stories (id serial, title text, author_id bigint)`,
+		`CREATE TEMP TABLE request (request_uuid bigint, user_uuid bigint, type text, created_at datetime , status  text, params  jsonb)`,
+		`CREATE TEMP TABLE result (result_id  bigint, request_uuid bigint, id bigint, added_at  dateTime)`,
 	}
 	for _, q := range queries {
 		_, err := db.Exec(q)
@@ -41,70 +41,44 @@ func createSchema(db *pg.DB) error {
 	return nil
 }
 
-func ExampleDB_Model() {
+func Insert(user *User) {
 	db := pg.Connect(&pg.Options{
 		User: "postgres",
 	})
-
-	err := createSchema(db)
-	if err != nil {
+	err := db.Insert(user)
+	if(err != nil) {
 		panic(err)
 	}
-
-	user1 := &User{
-		Name:   "admin",
-		Emails: []string{"admin1@admin", "admin2@admin"},
-	}
-	err = db.Insert(user1)
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.Insert(&User{
-		Name:   "root",
-		Emails: []string{"root1@root", "root2@root"},
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	story1 := &Story{
-		Title:    "Cool story",
-		AuthorId: user1.Id,
-	}
-	err = db.Insert(story1)
-	if err != nil {
-		panic(err)
-	}
-
-	// Select user by primary key.
-	user := User{Id: user1.Id}
-	err = db.Select(&user)
-	if err != nil {
-		panic(err)
-	}
-
-	// Select all users.
-	var users []User
-	err = db.Model(&users).Select()
-	if err != nil {
-		panic(err)
-	}
-
-	// Select story and associated author in one query.
-	var story Story
-	err = db.Model(&story).
-		Column("story.*", "Author").
-		Where("story.id = ?", story1.Id).
-		Select()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(user)
-	fmt.Println(users)
-	fmt.Println(story)
-	// Output: User<1 admin [admin1@admin admin2@admin]>
-	// [User<1 admin [admin1@admin admin2@admin]> User<2 root [root1@root root2@root]>]
-	// Story<1 Cool story User<1 admin [admin1@admin admin2@admin]>>
 }
+
+func Read(id int)  {
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+	})
+	user := User{Id: id}
+	err := db.Select(&user)
+	if err != nil {
+		panic(err)
+	}
+}
+func Update(user *User) {
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+	})
+	err := db.Update(user)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func Delete(user *User) {
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+	})
+	err := db.Delete(user)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+
