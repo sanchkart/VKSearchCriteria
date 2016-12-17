@@ -16,13 +16,13 @@ type VKGroupIDData struct {
 		 } `json:"response"`
 }
 
-func mathGroups(groups []string, membersMin,peopleMax int) []string {
+func MathGroups(groups []string, membersMin,peopleMax int) []string {
 	var groupsData = make(map[string]VKGroupIDData)
 	var offsetData []int //Какой элемент сейчас
 	var partData []int //Какая часть элемента
 	var answerData []string
 	for _,name  := range groups{
-		groupsData[name] = getVKGroupIDs(name,"id_asc","0",strconv.Itoa(peopleMax))
+		groupsData[name] = GetVKGroupIDs(name,"id_asc","0",strconv.Itoa(peopleMax))
 		offsetData = append(offsetData,0)
 		partData = append(partData,0)
 	}
@@ -37,7 +37,7 @@ func mathGroups(groups []string, membersMin,peopleMax int) []string {
 				if(offsetData[i]+1>=peopleMax){
 					offsetData[i]=0;
 					partData[i]++;
-					groupsData[name] = getVKGroupIDs(name,"id_asc",strconv.Itoa(partData[i]*peopleMax),strconv.Itoa(peopleMax))
+					groupsData[name] = GetVKGroupIDs(name,"id_asc",strconv.Itoa(partData[i]*peopleMax),strconv.Itoa(peopleMax))
 				}
 				if(minID==-1){
 					minID=groupsData[name].Response.Users[offsetData[i]]
@@ -77,7 +77,7 @@ func mathGroups(groups []string, membersMin,peopleMax int) []string {
 	return answerData
 }
 
-func getVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
+func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
 	// Login/pass auth
 	//api.AccessToken = ""
 
@@ -103,6 +103,7 @@ func getVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
 	}
 
 	var data VKGroupIDData
+
 	if err := json.Unmarshal([]byte(strResp),&data); err != nil {
 		log.Println("Parsing VK GetMembers error:", err.Error())
 	}
