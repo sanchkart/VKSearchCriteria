@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"gopkg.in/pg.v5"
-	"time"
 )
 
 type User struct {
@@ -12,11 +11,11 @@ type User struct {
 	Emails []string
 }
 
-type Request struct {
+type Result struct {
 	result_id	int
 	request_uuid	int
 	id		int
-	added_at	time.Time
+	added_at	int
 }
 
 func (u User) String() string {
@@ -48,32 +47,48 @@ func createSchema(db *pg.DB) error {
 	return nil
 }
 
-func Insert(db *pg.DB, request *Request) {
-	err := db.Insert(request)
+func Insert(db *pg.DB, result *Result) {
+	err := db.Insert(&result)
 	if(err != nil) {
 		panic(err)
 	}
 }
 
-func Read(db *pg.DB, id int)  {
-	user := User{Id: id}
-	err := db.Select(&user)
-	if err != nil {
-		panic(err)
-	}
-}
-func Update(db *pg.DB, request *Request) {
-	err := db.Update(request)
+//func Read(db *pg.DB, id int)  {
+//	user := User{Id: id}
+//	err := db.Select(&user)
+//	if err != nil {
+//		panic(err)
+//	}
+//}
+func Update(db *pg.DB, result *Result) {
+	err := db.Update(result)
 	if(err != nil) {
 		panic(err)
 	}
 }
 
-func Delete(db *pg.DB, request *Request) {
-	err := db.Delete(request)
+func Delete(db *pg.DB, result *Result) {
+	err := db.Delete(result)
 	if(err != nil) {
 		panic(err)
 	}
+}
+
+func main()  {
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+		Password: "411207",
+	})
+
+	result :=  &Result{
+		result_id : 1,
+		request_uuid : 1,
+		id : 1,
+		added_at : 1,
+	}
+
+	Insert(db, result)
 }
 
 
