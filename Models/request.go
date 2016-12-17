@@ -1,10 +1,12 @@
-package main
+package Models
 
 import "time"
 
 type Request struct {
-	result_id	int
-	request_uuid	int
-	id		int
-	added_at	time.Time
+	RequestUuid	int64
+	UserUuid	int64
+	TypeRequest	string
+	CreatedAt	time.Time
+	Status		string
+	Params		string
 }
