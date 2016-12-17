@@ -1,11 +1,13 @@
 <component name="libraryTable">
   <library name="GOPATH &lt;CVKS&gt;">
     <CLASSES>
+      <root url="file://$USER_HOME$/GolangLibraries/src/gopkg.in" />
       <root url="file://$USER_HOME$/GolangLibraries/src/github.com" />
       <root url="file://$USER_HOME$/GolangLibraries/src/golang.org" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
+      <root url="file://$USER_HOME$/GolangLibraries/src/gopkg.in" />
       <root url="file://$USER_HOME$/GolangLibraries/src/github.com" />
       <root url="file://$USER_HOME$/GolangLibraries/src/golang.org" />
     </SOURCES>
