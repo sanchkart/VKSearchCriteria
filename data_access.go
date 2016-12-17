@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"gopkg.in/pg.v5"
+	"time"
 )
 
 type User struct {
@@ -12,31 +12,25 @@ type User struct {
 }
 
 type Result struct {
-	result_id	int
-	request_uuid	int
-	id		int
-	added_at	int
+	ResultId	int64
+	RequestUuid	int64
+	Id		int64
+	AddedAt	time.Time
 }
 
-func (u User) String() string {
-	return fmt.Sprintf("User<%d %s %v>", u.Id, u.Name, u.Emails)
-}
-
-type Story struct {
-	Id       int64
-	Title    string
-	AuthorId int64
-	Author   *User
-}
-
-func (s Story) String() string {
-	return fmt.Sprintf("Story<%d %s %s>", s.Id, s.Title, s.Author)
+type Request struct {
+	RequestUuid	int64
+	UserUuid	int64
+	TypeRequest	string
+	CreatedAt	time.Time
+	Status		string
+	Params		string
 }
 
 func createSchema(db *pg.DB) error {
 	queries := []string{
-		`CREATE TEMP TABLE request (request_uuid bigint, user_uuid bigint, type text, created_at datetime , status  text, params  jsonb)`,
-		`CREATE TEMP TABLE result (result_id  bigint, request_uuid bigint, id bigint, added_at  dateTime)`,
+		`CREATE TABLE results (result_id serial, request_uuid serial, id serial, added_at timestamp)`,
+		`CREATE TABLE requests (request_uuid serial, user_uuid serial, type_request text, created_at timestamp, status text, params text)`,
 	}
 	for _, q := range queries {
 		_, err := db.Exec(q)
@@ -54,13 +48,14 @@ func Insert(db *pg.DB, result *Result) {
 	}
 }
 
-//func Read(db *pg.DB, id int)  {
-//	user := User{Id: id}
-//	err := db.Select(&user)
-//	if err != nil {
-//		panic(err)
-//	}
-//}
+func Read(db *pg.DB, id int64)  {
+	result := Result{Id: id}
+	err := db.Select(&result)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Update(db *pg.DB, result *Result) {
 	err := db.Update(result)
 	if(err != nil) {
@@ -80,15 +75,18 @@ func main()  {
 		User: "postgres",
 		Password: "411207",
 	})
+	createSchema(db)
 
-	result :=  &Result{
-		result_id : 1,
-		request_uuid : 1,
-		id : 1,
-		added_at : 1,
+	result1 := &Result{
+		ResultId:	1,
+		RequestUuid:	1,
+		Id:	1,
+		AddedAt: time.Now(),
 	}
 
-	Insert(db, result)
+	Insert(db, result1)
+
+	//Insert(db, result)
 }
 
 
