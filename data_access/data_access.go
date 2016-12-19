@@ -3,29 +3,8 @@ package main
 import (
 	"gopkg.in/pg.v5"
 	"time"
+	"../models"
 )
-
-type User struct {
-	Id     int64
-	Name   string
-	Emails []string
-}
-
-type Result struct {
-	ResultId	int64
-	RequestUuid	int64
-	Id		int64
-	AddedAt	time.Time
-}
-
-type Request struct {
-	RequestUuid	int64
-	UserUuid	int64
-	TypeRequest	string
-	CreatedAt	time.Time
-	Status		string
-	Params		string
-}
 
 func createSchema(db *pg.DB) error {
 	queries := []string{
@@ -41,7 +20,7 @@ func createSchema(db *pg.DB) error {
 	return nil
 }
 
-func Insert(db *pg.DB, result *Result) {
+func Insert(db *pg.DB, result *models.Result) {
 	err := db.Insert(&result)
 	if(err != nil) {
 		panic(err)
@@ -49,21 +28,21 @@ func Insert(db *pg.DB, result *Result) {
 }
 
 func Read(db *pg.DB, id int64)  {
-	result := Result{Id: id}
+	result := models.Result{Id: id}
 	err := db.Select(&result)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func Update(db *pg.DB, result *Result) {
+func Update(db *pg.DB, result *models.Result) {
 	err := db.Update(result)
 	if(err != nil) {
 		panic(err)
 	}
 }
 
-func Delete(db *pg.DB, result *Result) {
+func Delete(db *pg.DB, result *models.Result) {
 	err := db.Delete(result)
 	if(err != nil) {
 		panic(err)
@@ -71,13 +50,14 @@ func Delete(db *pg.DB, result *Result) {
 }
 
 func main()  {
+	//TODO Theese need to handle from main.go
 	db := pg.Connect(&pg.Options{
 		User: "postgres",
 		Password: "411207",
 	})
 	createSchema(db)
 
-	result1 := &Result{
+	result1 := &models.Result{
 		ResultId:	1,
 		RequestUuid:	1,
 		Id:	1,
