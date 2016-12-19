@@ -1,39 +1,37 @@
 package main
 
 import (
-	"log"
-	"encoding/json"
-	"os"
+	"./utils"
 	"./vkutils"
+	"runtime"
+	"log"
 )
 
 
-type Configuration struct {
-	DBConfig    map[string]string `json:"DBConfig"`
-	CountGoroutine int `json:"CountGoroutine"`
-	Tokens []string `json:"Tokens"`
-}
-
 
 func main() {
-	//log.Println(loadConfiguration())
-	log.Print(vkutils.GetVKGroupIDs("59469600","id_asc","0","100"))
-	var answer = vkutils.MathGroups([]string{"noizemc","59469600"},2,1000)
-	log.Println(len(answer))
-	log.Println(answer)
+	runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
+
+
+	startTest([]string{"59469600","twentyone_pilots"},2,1000)
 }
 
-func loadConfiguration() Configuration{
-	configFile, err := os.Open("config.json")
-	if err != nil {
-		log.Println("Opening config file error:", err.Error())
-	}
+func startTest(groups []string,minGroup int, count int){
+	/*
+	log.Println("Start1")
+	var answer = vkutils.MathGroupsOld(groups,minGroup,count)
+	log.Println(len(answer))
+	log.Println(answer)
+	log.Println("Finish1")
 
-	jsonParser := json.NewDecoder(configFile)
+	log.Println("Start2")
+	answer = vkutils.MathGroupsTwo(groups,minGroup,count)
+	log.Println(len(answer))
+	log.Println(answer)
+	log.Println("Finish2")
+	*/
 
-	var data Configuration
-	if err = jsonParser.Decode(&data); err != nil {
-		log.Println("Parsing config file error:", err.Error())
-	}
-	return data
+	log.Println(vkutils.MathGroups(groups,minGroup,count))
+	//var input string
+	//fmt.Scanln(&input)
 }
