@@ -1,13 +1,14 @@
-package main
+package data_access
 
 import (
 	"gopkg.in/pg.v5"
 	"time"
 	"../models"
 )
-
-func createSchema(db *pg.DB) error {
+//TODO IN COMMON Generalize this class for working with T
+func CreateSchema(db *pg.DB) error {
 	queries := []string{
+		`CREATE TABLE users (user_uuid  serial, key text, name  text`,
 		`CREATE TABLE results (result_id serial, request_uuid serial, id serial, added_at timestamp)`,
 		`CREATE TABLE requests (request_uuid serial, user_uuid serial, type_request text, created_at timestamp, status text, params text)`,
 	}
@@ -20,14 +21,28 @@ func createSchema(db *pg.DB) error {
 	return nil
 }
 
-func Insert(db *pg.DB, result *models.Result) {
+func InsertUser(db *pg.DB, result *models.Result) {
 	err := db.Insert(&result)
 	if(err != nil) {
 		panic(err)
 	}
 }
 
-func Read(db *pg.DB, id int64)  {
+func InsertResult(db *pg.DB, result *models.Result) {
+	err := db.Insert(&result)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func InsertRequest(db *pg.DB, result *models.Request) {
+	err := db.Insert(&result)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func ReadUser(db *pg.DB, id int64)  {
 	result := models.Result{Id: id}
 	err := db.Select(&result)
 	if err != nil {
@@ -35,15 +50,52 @@ func Read(db *pg.DB, id int64)  {
 	}
 }
 
-func Update(db *pg.DB, result *models.Result) {
+func ReadResult(db *pg.DB, id int64)  {
+	result := models.Result{Id: id}
+	err := db.Select(&result)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ReadRequest(db *pg.DB, id int64)  {
+	result := models.Request{RequestUuid: id}
+	err := db.Select(&result)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func UpdateUser(db *pg.DB, result *models.User) {
 	err := db.Update(result)
 	if(err != nil) {
 		panic(err)
 	}
 }
 
-func Delete(db *pg.DB, result *models.Result) {
+func UpdateResult(db *pg.DB, result *models.Result) {
+	err := db.Update(result)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func UpdateRequest(db *pg.DB, result *models.Request) {
+	err := db.Update(result)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func DeleteResult(db *pg.DB, result *models.Result) {
 	err := db.Delete(result)
+	if(err != nil) {
+		panic(err)
+	}
+}
+
+func DeleteRequest(db *pg.DB, request *models.Request) {
+	err := db.Delete(request)
 	if(err != nil) {
 		panic(err)
 	}
@@ -55,7 +107,7 @@ func main()  {
 		User: "postgres",
 		Password: "411207",
 	})
-	createSchema(db)
+	CreateSchema(db)
 
 	result1 := &models.Result{
 		ResultId:	1,
@@ -64,7 +116,7 @@ func main()  {
 		AddedAt: time.Now(),
 	}
 
-	Insert(db, result1)
+	InsertResult(db, result1)
 
 	//Insert(db, result)
 }

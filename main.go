@@ -7,8 +7,6 @@ import (
 	"log"
 )
 
-
-
 func main() {
 	runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
 
