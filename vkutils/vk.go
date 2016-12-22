@@ -26,7 +26,7 @@ type VKUserData struct {
 }
 
 func MathGroups(groups []string, membersMin,peopleMax int) []int {
-	//log.Println("AlgoStart")
+	log.Println("AlgoStart")
 	var answerData []int
 
 	var part chan int = make(chan int)
@@ -79,7 +79,6 @@ func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []
 			if((minID==-1)||(minID>data[len(data) - 1])) {
 				minID = data[len(data) - 1]
 			}
-			//log.Println(count+1)
 		}
 		count++
 		if(count==countGroup){
@@ -88,6 +87,7 @@ func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []
 				newMinID<--1
 				break
 			}
+			//log.Println(partCount+1)
 			//log.Println("NEXTPART")
 			partCount++
 			count=0
@@ -106,7 +106,7 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 	for{
 		newMinID := <-newMinID
 		if(newMinID==-1){
-			//log.Println("Analisys stop!!!")
+			log.Println("Analisys stop!!!")
 			//log.Println(answer)
 			//log.Println(len(answer))
 			answerFinish<-answer
@@ -114,9 +114,9 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 		}
 
 		data := <-aData
-		fullData = MergeSort(append(fullData,data...))
+		fullData = BinSort(fullData,data)//MergeSort(append(fullData,data...))
 		checkID := fullData[0]
-		//log.Println(len(fullData),fullData)
+		//log.Println(len(fullData))
 		count := 0
 		for i := range fullData{
 			if(fullData[i]>newMinID){
