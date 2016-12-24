@@ -25,7 +25,7 @@ type VKUserData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin,peopleMax int) []int {
+func MathGroups(groups []string, membersMin, peopleMax, gorutineCount int) []int {
 	var answerData []int
 
 	var part chan int = make(chan int)
@@ -40,7 +40,13 @@ func MathGroups(groups []string, membersMin,peopleMax int) []int {
 
 	go checkFunc(groupData,len(groups),part,aData,newMinID)
 
-	go partControl(part,groups,peopleMax,groupData)
+	if(gorutineCount<5){
+		gorutineCount=5
+	}
+
+	gorutineCount-=4
+
+	go partControl(part,groups,peopleMax,gorutineCount,groupData)
 	part<-0
 
 	answerData = <-answer
@@ -48,21 +54,37 @@ func MathGroups(groups []string, membersMin,peopleMax int) []int {
 	return answerData
 }
 
-func partControl(part chan int, groups []string, peopleMax int, groupDataForCheckFunc chan []int){
+func partControl(part chan int, groups []string, peopleMax, gorutineCount int, groupDataForCheckFunc chan []int){
 	for{
 		dataPart:=<-part
 		if(dataPart==-1){
 			break;
 		}
+		gorutineCountNow := 0
 		for _,name := range groups{
-			go partGetter(name,dataPart,peopleMax,groupDataForCheckFunc)
+			var back chan bool = make(chan bool)
+			go partGetter(name,dataPart,peopleMax,groupDataForCheckFunc,back)
+			gorutineCountNow++
+			if(gorutineCountNow<gorutineCount){
+				back<-false
+			}else{
+				back<-true
+				gorutineCountNow=0
+				<-back
+			}
 		}
 	}
 }
 
-func partGetter(nameGroup string, dataPart int, peopleMax int, groupDataForCheckFunc chan []int){
+func partGetter(nameGroup string, dataPart int, peopleMax int, groupDataForCheckFunc chan []int, backAnswer chan bool){
+	log.Println("Thread start")
+	flag := <- backAnswer
 	data := GetVKGroupIDs(nameGroup,"id_asc",strconv.Itoa(dataPart*peopleMax),strconv.Itoa(peopleMax))
 	groupDataForCheckFunc<-data.Response.Users
+	if(flag) {
+		backAnswer <- true
+		log.Println("Thread finish")
+	}
 }
 
 func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []int, newMinID chan int){
