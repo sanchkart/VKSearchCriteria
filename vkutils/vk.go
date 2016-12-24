@@ -26,8 +26,6 @@ type VKUserData struct {
 }
 
 func MathGroups(groups []string, membersMin,peopleMax int) []int {
-	log.Println(len(groups))
-	log.Println("AlgoStart")
 	var answerData []int
 
 	var part chan int = make(chan int)
@@ -54,7 +52,6 @@ func partControl(part chan int, groups []string, peopleMax int, groupDataForChec
 	for{
 		dataPart:=<-part
 		if(dataPart==-1){
-			log.Println("FINISH WORK")
 			break;
 		}
 		for _,name := range groups{
@@ -88,8 +85,6 @@ func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []
 				newMinID<--1
 				break
 			}
-			//log.Println(partCount+1)
-			//log.Println("NEXTPART")
 			partCount++
 			count=0
 			newMinID<-minID
@@ -107,24 +102,13 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 	for{
 		newMinID := <-newMinID
 		if(newMinID==-1){
-			log.Println("Analisys stop!!!")
-			//log.Println(answer)
-			//log.Println(len(answer))
 			answerFinish<-answer
 			break
 		}
 
 		data := <-aData
-		var ans chan []int = make(chan []int)
-		//go MergeSortTwo(append(fullData,data...),ans)
-		go MergeSortNext(append(fullData,data...),ans)
-		//fullData=MergeSort(append(fullData,data...))
-		//log.Println("masMergeOne",MergeSort(append(fullData,data...)))
-		//log.Println(len(MergeSort(append(fullData,data...))))
-		//lOldAlg := len(MergeSort(append(fullData,data...)))
-		fullData = <-ans
+		fullData=MergeSort(append(fullData,data...))
 		checkID := fullData[0]
-		//log.Println("masMergeTwo",fullData)
 		count := 0
 		for i := range fullData{
 			if(fullData[i]>newMinID){
@@ -136,8 +120,6 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 			}else{
 				if(count>=membersMin){
 					answer = append(answer,checkID)
-				//	var data = GetVKUser(strconv.Itoa(checkID))
-				//	log.Println("https://vk.com/id"+strconv.Itoa(checkID), " ", data.Response[0].FirstName," ",data.Response[0].LastName)
 				}
 				checkID=fullData[i]
 				count=1
@@ -147,19 +129,6 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 }
 
 func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
-	// Login/pass auth
-	//api.AccessToken = ""
-
-	//	err := api.LoginAuth(
-	//		"email/pass",
-	//		"pass",
-	//		"3087104",      // client id
-	//		"wall,offline", // scope (permissions)
-	//	)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	// Make query
 	params := make(map[string]string)
 	params["group_id"] = groupID
 	params["sort"] = sort
