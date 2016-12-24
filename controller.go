@@ -10,6 +10,7 @@ import (
 	"./models"
 	"gopkg.in/pg.v5"
 	"time"
+	"strconv"
 )
 
 func main() {
@@ -28,7 +29,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.RawQuery) > 0 {
 		var groups []string = r.URL.Query().Get("groups")
-		var memberMin = r.URL.Query().Get("member_min")
+		var memberMin, err = strconv.ParseInt(r.URL.Query().Get("member_min"), 10, 32)
+		if(err != nil) {
+			w.WriteHeader(404)
+		}
+
 		db := pg.Connect(&pg.Options{
 			User: "postgres",
 			Password: "411207",
@@ -43,7 +48,7 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 		}
 
 		data_access.InsertRequest(db, request);
-		vkutils.MathGroups(groups,memberMin, 1000)
+		vkutils.MathGroups(groups,int(memberMin), 1000)
 	}
 	fmt.Fprintln(w, "MembersIntersect")
 }
