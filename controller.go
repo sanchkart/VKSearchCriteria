@@ -70,5 +70,5 @@ func GetResult(w http.ResponseWriter, r *http.Request) {
 	}
 	data_access.InsertResult(db, result)
 	var data = data_access.ReadResult(db, 1);
-	fmt.Printf("%v\n",data)
+	fmt.Fprintln(w, data.Id)
 }
