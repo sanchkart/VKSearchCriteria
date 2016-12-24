@@ -28,7 +28,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.RawQuery) > 0 {
-		var groups []string = r.URL.Query().Get("groups")
+		var groups []string = r.URL.Query()["groups"]
 		var memberMin, err = strconv.ParseInt(r.URL.Query().Get("member_min"), 10, 32)
 		if(err != nil) {
 			w.WriteHeader(404)
