@@ -26,6 +26,7 @@ type VKUserData struct {
 }
 
 func MathGroups(groups []string, membersMin,peopleMax int) []int {
+	log.Println(len(groups))
 	log.Println("AlgoStart")
 	var answerData []int
 
@@ -114,9 +115,16 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 		}
 
 		data := <-aData
-		fullData = BinSort(fullData,data)//MergeSort(append(fullData,data...))
+		var ans chan []int = make(chan []int)
+		//go MergeSortTwo(append(fullData,data...),ans)
+		go MergeSortNext(append(fullData,data...),ans)
+		//fullData=MergeSort(append(fullData,data...))
+		//log.Println("masMergeOne",MergeSort(append(fullData,data...)))
+		//log.Println(len(MergeSort(append(fullData,data...))))
+		//lOldAlg := len(MergeSort(append(fullData,data...)))
+		fullData = <-ans
 		checkID := fullData[0]
-		//log.Println(len(fullData))
+		//log.Println("masMergeTwo",fullData)
 		count := 0
 		for i := range fullData{
 			if(fullData[i]>newMinID){
@@ -128,8 +136,8 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 			}else{
 				if(count>=membersMin){
 					answer = append(answer,checkID)
-					var data = GetVKUser(strconv.Itoa(checkID))
-					log.Println("https://vk.com/id"+strconv.Itoa(checkID), " ", data.Response[0].FirstName," ",data.Response[0].LastName)
+				//	var data = GetVKUser(strconv.Itoa(checkID))
+				//	log.Println("https://vk.com/id"+strconv.Itoa(checkID), " ", data.Response[0].FirstName," ",data.Response[0].LastName)
 				}
 				checkID=fullData[i]
 				count=1

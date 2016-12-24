@@ -2,7 +2,7 @@
   "DBConfig": {
     "User": "postgres"
   },
-  "CountGoroutine" : 4,
+  "CountGoroutine" : 30000,
   "Tokens": [
     "acyUk7haPmIMFMsiA5OB",
     "acyUk7haPmIMFMsiA5OB"
