@@ -11,6 +11,8 @@ import (
 	"gopkg.in/pg.v5"
 	"time"
 	"strconv"
+	"runtime"
+	"./utils"
 )
 
 func main() {
@@ -48,11 +50,18 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 		}
 
 		data_access.InsertRequest(db, request);
-		vkutils.MathGroups(groups,int(memberMin), 1000)
+		runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
+		log.Println(len(vkutils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
 	}
 	fmt.Fprintln(w, "MembersIntersect")
 }
 
 func GetResult(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Todo show:", 1)
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+		Password: "411207",
+	})
+
+	var data = data_access.ReadRequest(db, 1);
+	fmt.Fprintln(data)
 }
