@@ -36,9 +36,12 @@ func MathGroups(groups []string, membersMin, peopleMax, gorutineCount int) []int
 
 	var answer chan []int = make(chan []int)
 
+	var num chan int = make(chan int)
+	var checkGroup chan []bool = make(chan []bool)
+
 	go analysisData(answer,aData,newMinID,membersMin)
 
-	go checkFunc(groupData,len(groups),part,aData,newMinID)
+	go checkFunc(groupData,aData,checkGroup,part,newMinID,num)
 
 	if(gorutineCount<5){
 		gorutineCount=5
@@ -46,58 +49,78 @@ func MathGroups(groups []string, membersMin, peopleMax, gorutineCount int) []int
 
 	gorutineCount-=4
 
-	go partControl(part,groups,peopleMax,gorutineCount,groupData)
+	go partControl(part,num,groups,peopleMax,gorutineCount,groupData,checkGroup)
+
 	part<-0
+
+	var check []bool
+	for i:=0;i<len(groups);i++{
+		check = append(check,true)
+	}
+
+	checkGroup<-check
+	checkGroup<-check
 
 	answerData = <-answer
 
 	return answerData
 }
 
-func partControl(part chan int, groups []string, peopleMax, gorutineCount int, groupDataForCheckFunc chan []int){
+func partControl(part,num chan int, groups []string, peopleMax, gorutineCount int, groupDataForCheckFunc chan []int, checkGroup chan []bool){
 	for{
 		dataPart:=<-part
+		check := <-checkGroup
 		if(dataPart==-1){
 			break;
 		}
 		gorutineCountNow := 0
-		for _,name := range groups{
-			var back chan bool = make(chan bool)
-			go partGetter(name,dataPart,peopleMax,groupDataForCheckFunc,back)
-			gorutineCountNow++
-			if(gorutineCountNow<gorutineCount){
-				back<-false
-			}else{
-				back<-true
-				gorutineCountNow=0
-				<-back
+		for i,name := range groups{
+			if(check[i]) {
+				var back chan bool = make(chan bool)
+				go partGetter(name, dataPart, peopleMax, i, groupDataForCheckFunc, back, num)
+				gorutineCountNow++
+				if (gorutineCountNow < gorutineCount) {
+					back <- false
+				} else {
+					back <- true
+					gorutineCountNow = 0
+					<-back
+				}
 			}
 		}
 	}
 }
 
-func partGetter(nameGroup string, dataPart int, peopleMax int, groupDataForCheckFunc chan []int, backAnswer chan bool){
-	log.Println("Thread start")
+func partGetter(nameGroup string, dataPart, peopleMax, i int, groupDataForCheckFunc chan []int, backAnswer chan bool, num chan int){
 	flag := <- backAnswer
 	data := GetVKGroupIDs(nameGroup,"id_asc",strconv.Itoa(dataPart*peopleMax),strconv.Itoa(peopleMax))
 	groupDataForCheckFunc<-data.Response.Users
+	num<-i
 	if(flag) {
 		backAnswer <- true
-		log.Println("Thread finish")
 	}
 }
 
-func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []int, newMinID chan int){
+func checkFunc(groupData, aData chan []int, checkGroup chan []bool, part, newMinID, num chan int){
 	count := 0
 	partCount := 0
 	minID := -1
+	check := <-checkGroup
+	countGroup := len(check)
 	var fullData []int
 	for{
 		data:=<-groupData
+		numElement:=<-num
 		fullData = append(fullData,data...)
 		if(len(data)>0){
 			if((minID==-1)||(minID>data[len(data) - 1])) {
 				minID = data[len(data) - 1]
+			}
+		}else{
+			if(check[numElement]) {
+				check[numElement] = false
+				count--
+				countGroup--
 			}
 		}
 		count++
@@ -112,6 +135,7 @@ func checkFunc(groupData chan []int, countGroup int, part chan int,aData chan []
 			newMinID<-minID
 			aData<-fullData
 			part<-partCount
+			checkGroup<-check
 			fullData = make([]int,0)
 			minID = -1
 		}
@@ -127,7 +151,6 @@ func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin i
 			answerFinish<-answer
 			break
 		}
-
 		data := <-aData
 		fullData=MergeSort(append(fullData,data...))
 		checkID := fullData[0]
