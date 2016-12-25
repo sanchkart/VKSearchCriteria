@@ -52,11 +52,12 @@ func ReadUser(db *pg.DB, id int64)  (result models.User) {
 }
 
 func ReadResult(db *pg.DB, id int64) (result models.Result){
-	result = models.Result{Id: id}
-	err := db.Select(&result)
+	var results []models.Result
+	err := db.Model(&results).Select()
 	if err != nil {
 		panic(err)
 	}
+	result = results[0]
 	return
 }
 

@@ -61,7 +61,14 @@ func GetResult(w http.ResponseWriter, r *http.Request) {
 		User: "postgres",
 		Password: "411207",
 	})
-
-	var data = data_access.ReadRequest(db, 1);
-	fmt.Fprintln(data)
+	data_access.CreateSchema(db)
+	result := &models.Result{
+		RequestUuid:	1,
+		Id:	1,
+		ResultId:	1,
+		AddedAt: time.Now(),
+	}
+	data_access.InsertResult(db, result)
+	var data = data_access.ReadResult(db, 1);
+	fmt.Fprintln(w, data.Id)
 }
