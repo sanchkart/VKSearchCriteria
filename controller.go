@@ -40,7 +40,6 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 			User: "postgres",
 			Password: "411207",
 		})
-		data_access.CreateSchema(db)
 
 		request := &models.Request{
 			RequestUuid:	1,
