@@ -1,4 +1,4 @@
-package vkutils
+package vk_utils
 
 func MergeSort(m []int) []int {
 	if len(m) <= 1 {

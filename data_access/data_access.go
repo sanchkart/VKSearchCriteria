@@ -106,24 +106,4 @@ func DeleteRequest(db *pg.DB, request *models.Request) {
 	}
 }
 
-func main()  {
-	//TODO Theese need to handle from main.go
-	db := pg.Connect(&pg.Options{
-		User: "postgres",
-		Password: "411207",
-	})
-	CreateSchema(db)
-
-	result1 := &models.Result{
-		ResultId:	1,
-		RequestUuid:	1,
-		Id:	1,
-		AddedAt: time.Now(),
-	}
-
-	InsertResult(db, result1)
-
-	//Insert(db, result)
-}
-
 

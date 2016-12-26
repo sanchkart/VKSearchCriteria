@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/mux"
-	"./vkutils"
+	"./vk_utils"
 	"./data_access"
 	"./models"
 	"gopkg.in/pg.v5"
@@ -32,7 +32,7 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.RawQuery) > 0 {
 		var groups []string = r.URL.Query()["groups"]
 		var memberMin, err = strconv.ParseInt(r.URL.Query().Get("member_min"), 10, 32)
-		if(err != nil) {
+		if err != nil {
 			w.WriteHeader(404)
 		}
 
@@ -40,35 +40,34 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 			User: "postgres",
 			Password: "411207",
 		})
-		data_access.CreateSchema(db)
 
 		request := &models.Request{
 			RequestUuid:	1,
 			UserUuid:	1,
-			TypeRequest:	"Merge",
+			TypeRequest:	"Create",
 			CreatedAt: time.Now(),
 		}
 
 		data_access.InsertRequest(db, request);
 		runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
-		log.Println(len(vkutils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
+		log.Println(len(vk_utils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
 	}
 	fmt.Fprintln(w, "MembersIntersect")
 }
 
 func GetResult(w http.ResponseWriter, r *http.Request) {
-	db := pg.Connect(&pg.Options{
-		User: "postgres",
-		Password: "411207",
-	})
-	data_access.CreateSchema(db)
-	result := &models.Result{
-		RequestUuid:	1,
-		Id:	1,
-		ResultId:	1,
-		AddedAt: time.Now(),
+	if len(r.URL.RawQuery) > 0 {
+		var id, err = strconv.ParseInt(r.URL.Query().Get("request_id"), 10, 32)
+		if err != nil {
+			w.WriteHeader(404)
+		}
+
+		db := pg.Connect(&pg.Options{
+			User:     "postgres",
+			Password: "411207",
+		})
+
+		var data= data_access.ReadResult(db, id);
+		fmt.Fprintln(w, data.Id)
 	}
-	data_access.InsertResult(db, result)
-	var data = data_access.ReadResult(db, 1);
-	fmt.Fprintln(w, data.Id)
 }
