@@ -2,11 +2,12 @@ package models
 
 import "time"
 
+
 type Request struct {
-	RequestUuid	int64
-	UserUuid	int64
+	RequestUuid	int
+	UserUuid	int
 	TypeRequest	string
 	CreatedAt	time.Time
 	Status		string
-	Params		string
+	Params		Param
 }

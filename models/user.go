@@ -1,7 +1,7 @@
 package models
 
 type User struct {
-	UserUuid	int64
+	UserUuid	int
 	Key		string
 	Name		string
 }

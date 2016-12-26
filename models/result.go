@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Result struct {
-	ResultId	int64
-	RequestUuid	int64
-	Id		int64
+	ResultId	int
+	RequestUuid	int
+	Id		int
 	AddedAt	time.Time
 }

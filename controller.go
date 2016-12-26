@@ -42,15 +42,14 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 		})
 
 		request := &models.Request{
-			RequestUuid:	1,
 			UserUuid:	1,
 			TypeRequest:	"Create",
 			CreatedAt: time.Now(),
 		}
 
 		data_access.InsertRequest(db, request);
-		runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
-		log.Println(len(vk_utils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
+		//runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
+		//log.Println(len(vk_utils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
 	}
 	fmt.Fprintln(w, "MembersIntersect")
 }
