@@ -2,9 +2,9 @@ package vkutils
 
 import (
 	"github.com/yanple/vk_api"
-	"strconv"
 	"encoding/json"
 	"log"
+	"strconv"
 )
 
 var api = &vk_api.Api{}
@@ -25,152 +25,41 @@ type VKUserData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin, peopleMax, gorutineCount int) []int {
+func MathGroups(groups []string, membersMin, peopleMax int) []int{
 	var answerData []int
+	var fullData = make(map[string]int)
 
-	var part chan int = make(chan int)
-	var groupData chan []int = make(chan []int)
+	part := 0
 
-	var aData chan []int = make(chan []int)
-	var newMinID chan int = make(chan int)
-
-	var answer chan []int = make(chan []int)
-
-	var num chan int = make(chan int)
-	var checkGroup chan []bool = make(chan []bool)
-
-	go analysisData(answer,aData,newMinID,membersMin)
-
-	go checkFunc(groupData,aData,checkGroup,part,newMinID,num)
-
-	if(gorutineCount<5){
-		gorutineCount=5
-	}
-
-	gorutineCount-=4
-
-	go partControl(part,num,groups,peopleMax,gorutineCount,groupData,checkGroup)
-
-	part<-0
-
-	var check []bool
-	for i:=0;i<len(groups);i++{
-		check = append(check,true)
-	}
-
-	checkGroup<-check
-	checkGroup<-check
-
-	answerData = <-answer
-
-	return answerData
-}
-
-func partControl(part,num chan int, groups []string, peopleMax, gorutineCount int, groupDataForCheckFunc chan []int, checkGroup chan []bool){
 	for{
-		dataPart:=<-part
-		check := <-checkGroup
-		if(dataPart==-1){
-			break;
-		}
-		gorutineCountNow := 0
-		for i,name := range groups{
-			if(check[i]) {
-				var back chan bool = make(chan bool)
-				go partGetter(name, dataPart, peopleMax, i, groupDataForCheckFunc, back, num)
-				gorutineCountNow++
-				if (gorutineCountNow < gorutineCount) {
-					back <- false
-				} else {
-					back <- true
-					gorutineCountNow = 0
-					<-back
+		count := 0
+
+		for _,name := range groups{
+			data := GetVKGroupIDs(name,"id_asc",strconv.Itoa(part*peopleMax),strconv.Itoa(peopleMax))
+			if(len(data.Response.Users)==0){
+				count++
+			}else {
+				for _, ID := range data.Response.Users {
+					fullData[strconv.Itoa(ID)]++
 				}
 			}
 		}
-	}
-}
 
-func partGetter(nameGroup string, dataPart, peopleMax, i int, groupDataForCheckFunc chan []int, backAnswer chan bool, num chan int){
-	flag := <- backAnswer
-	data := GetVKGroupIDs(nameGroup,"id_asc",strconv.Itoa(dataPart*peopleMax),strconv.Itoa(peopleMax))
-	groupDataForCheckFunc<-data.Response.Users
-	num<-i
-	if(flag) {
-		backAnswer <- true
-	}
-}
-
-func checkFunc(groupData, aData chan []int, checkGroup chan []bool, part, newMinID, num chan int){
-	count := 0
-	partCount := 0
-	minID := -1
-	check := <-checkGroup
-	countGroup := len(check)
-	var fullData []int
-	for{
-		data:=<-groupData
-		numElement:=<-num
-		fullData = append(fullData,data...)
-		if(len(data)>0){
-			if((minID==-1)||(minID>data[len(data) - 1])) {
-				minID = data[len(data) - 1]
-			}
-		}else{
-			if(check[numElement]) {
-				check[numElement] = false
-				count--
-				countGroup--
-			}
-		}
-		count++
-		if(count==countGroup){
-			if(len(fullData)==0){
-				part<--1
-				newMinID<--1
-				break
-			}
-			partCount++
-			count=0
-			newMinID<-minID
-			aData<-fullData
-			part<-partCount
-			checkGroup<-check
-			fullData = make([]int,0)
-			minID = -1
-		}
-	}
-}
-
-func analysisData(answerFinish,aData chan []int, newMinID chan int, membersMin int)  {
-	var fullData [] int
-	var answer [] int
-	for{
-		newMinID := <-newMinID
-		if(newMinID==-1){
-			answerFinish<-answer
+		if(len(groups)==count){
 			break
 		}
-		data := <-aData
-		fullData=MergeSort(append(fullData,data...))
-		checkID := fullData[0]
-		count := 0
-		for i := range fullData{
-			if(fullData[i]>newMinID){
-				fullData = fullData[i:]
-				break
-			}
-			if(checkID==fullData[i]){
-				count++
-			}else{
-				if(count>=membersMin){
-					answer = append(answer,checkID)
-				}
-				checkID=fullData[i]
-				count=1
-			}
+
+		part++
+	}
+
+	for ID,data := range fullData{
+		if(data >= membersMin){
+			realID, _ := strconv.Atoi(ID)
+			answerData = append(answerData,realID)
 		}
 	}
+
+	return answerData
 }
 
 func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
