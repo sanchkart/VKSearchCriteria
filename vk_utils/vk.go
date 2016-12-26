@@ -1,4 +1,4 @@
-package vkutils
+package vk_utils
 
 import (
 	"github.com/yanple/vk_api"
@@ -70,7 +70,7 @@ func partControl(part,num chan int, groups []string, peopleMax, gorutineCount in
 	for{
 		dataPart:=<-part
 		check := <-checkGroup
-		if(dataPart==-1){
+		if dataPart==-1 {
 			break;
 		}
 		gorutineCountNow := 0

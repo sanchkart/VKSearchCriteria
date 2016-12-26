@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/mux"
-	"./vkutils"
+	"./vk_utils"
 	"./data_access"
 	"./models"
 	"gopkg.in/pg.v5"
@@ -50,7 +50,7 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 
 		data_access.InsertRequest(db, request);
 		runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
-		log.Println(len(vkutils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
+		log.Println(len(vk_utils.MathGroups(groups, int(memberMin),1000,utils.LoadConfiguration().CountGoroutine)))
 	}
 	fmt.Fprintln(w, "MembersIntersect")
 }
