@@ -4,7 +4,7 @@ import "time"
 
 type Result struct {
 	ResultId	int
-	RequestUuid	int
+	RequestUuid	string
 	Id		int
 	AddedAt	time.Time
 }

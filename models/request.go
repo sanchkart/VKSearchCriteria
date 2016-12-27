@@ -4,8 +4,8 @@ import "time"
 
 
 type Request struct {
-	RequestUuid	int
-	UserUuid	int
+	RequestUuid	string
+	UserUuid	string
 	TypeRequest	string
 	CreatedAt	time.Time
 	Status		string
