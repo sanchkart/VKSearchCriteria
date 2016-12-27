@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"gopkg.in/pg.v5"
+	"time"
+	"../models"
+	"../data_access"
 )
 
 var api = &vk_api.Api{}
@@ -25,7 +29,7 @@ type VKUserData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin, peopleMax int) []int{
+func MathGroups(groups []string, membersMin, RequestUuid int) []int{
 	var answerData []int
 	var fullData = make(map[string]int)
 
@@ -35,7 +39,7 @@ func MathGroups(groups []string, membersMin, peopleMax int) []int{
 		count := 0
 
 		for _,name := range groups{
-			data := GetVKGroupIDs(name,"id_asc",strconv.Itoa(part*peopleMax),strconv.Itoa(peopleMax))
+			data := GetVKGroupIDs(name,"id_asc",strconv.Itoa(part*1000),"1000")
 			if(len(data.Response.Users)==0){
 				count++
 			}else {
@@ -52,10 +56,23 @@ func MathGroups(groups []string, membersMin, peopleMax int) []int{
 		part++
 	}
 
+	db := pg.Connect(&pg.Options{
+		User: "postgres",
+		Password: "411207",
+	})
+
 	for ID,data := range fullData{
 		if(data >= membersMin){
 			realID, _ := strconv.Atoi(ID)
 			answerData = append(answerData,realID)
+			result1 := &models.Result{
+				ResultId: data_access.ReadRequest(db,int64(RequestUuid)),
+				RequestUuid: RequestUuid,
+				Id: int64(realID),
+				AddedAt: time.Now(),
+			}
+
+			data_access.InsertResult(db, result1)
 		}
 	}
 
