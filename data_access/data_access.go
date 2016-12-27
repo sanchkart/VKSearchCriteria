@@ -42,7 +42,7 @@ func InsertRequest(db *pg.DB, result *models.Request) {
 	}
 }
 
-func ReadUser(db *pg.DB, id int64)  (result models.User) {
+func ReadUser(db *pg.DB, id string)  (result models.User) {
 	result = models.User{UserUuid: id}
 	err := db.Select(&result)
 	if err != nil {
@@ -61,7 +61,7 @@ func ReadResult(db *pg.DB, id int64) (result models.Result){
 	return
 }
 
-func ReadRequest(db *pg.DB, id int64)  (result models.Request){
+func ReadRequest(db *pg.DB, id string)  (result models.Request){
 	result = models.Request{RequestUuid: id}
 	err := db.Select(&result)
 	if err != nil {

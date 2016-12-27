@@ -5,14 +5,12 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/mux"
-	"./vk_utils"
 	"./data_access"
 	"./models"
 	"gopkg.in/pg.v5"
 	"time"
 	"strconv"
-	"runtime"
-	"./utils"
+	"encoding/json"
 )
 
 func main() {
@@ -30,10 +28,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.RawQuery) > 0 {
-		var groups []string = r.URL.Query()["groups"]
-		var memberMin, err = strconv.ParseInt(r.URL.Query().Get("member_min"), 10, 32)
+		decoder := json.NewDecoder(r.Body)
+		var query models.QueryMembers;
+		err := decoder.Decode(&query);
 		if err != nil {
-			w.WriteHeader(404)
+			panic(err)
 		}
 
 		db := pg.Connect(&pg.Options{
@@ -42,7 +41,7 @@ func MembersIntersect(w http.ResponseWriter, r *http.Request) {
 		})
 
 		request := &models.Request{
-			UserUuid:	1,
+			UserUuid:	"",
 			TypeRequest:	"Create",
 			CreatedAt: time.Now(),
 		}
