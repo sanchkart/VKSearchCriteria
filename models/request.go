@@ -1,10 +1,12 @@
 package models
 
-import "time"
+import ("time"
+	"github.com/satori/go.uuid"
+)
 
 
 type Request struct {
-	RequestUuid	string
+	RequestUuid	uuid.UUID
 	UserUuid	string
 	TypeRequest	string
 	CreatedAt	time.Time

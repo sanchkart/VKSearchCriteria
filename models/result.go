@@ -1,9 +1,12 @@
 package models
 
-import "time"
+import (
+	"time"
+	"github.com/satori/go.uuid"
+)
 
 type Result struct {
-	RequestUuid	string
+	RequestUuid	uuid.UUID
 	Id		int
 	AddedAt	time.Time
 }
