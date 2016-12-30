@@ -1,7 +1,7 @@
 {
-  "DBConfig": {
-    "User": "postgres"
-  },
+  "Host":"127.0.0.1:5432",
+  "User": "postgres",
+  "Password": "411207",
   "CountGoroutine" : 30000,
   "Tokens": [
     "acyUk7haPmIMFMsiA5OB",

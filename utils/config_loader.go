@@ -7,7 +7,9 @@ import (
 )
 
 type Configuration struct {
-	DBConfig    map[string]string `json:"DBConfig"`
+	Host    string `json:"Host"`
+	User    string `json:"User"`
+	Password    string `json:"Password"`
 	CountGoroutine int `json:"CountGoroutine"`
 	Tokens []string `json:"Tokens"`
 }

@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
-	"gopkg.in/pg.v5"
 	"time"
 	"../models"
-	"../data_access"
+	"net/url"
+	"container/list"
+	"github.com/satori/go.uuid"
 )
 
 var api = &vk_api.Api{}
@@ -29,8 +30,7 @@ type VKUserData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin, RequestUuid int) []int{
-	var answerData []int
+func MathGroups(groups []string, membersMin int, auth string,uuid uuid.UUID) *list.List{
 	var fullData = make(map[string]int)
 
 	part := 0
@@ -38,9 +38,14 @@ func MathGroups(groups []string, membersMin, RequestUuid int) []int{
 	for{
 		count := 0
 
-		for _,name := range groups{
-			data := GetVKGroupIDs(name,"id_asc",strconv.Itoa(part*1000),"1000")
-			if(len(data.Response.Users)==0){
+		for _,name := range groups {
+			url, err := url.Parse(name)
+			if err != nil {
+				log.Fatal(err)
+			}
+			urlPath := url.Path[1:len(url.Path)]
+			data := GetVKGroupIDs(urlPath,"id_asc",strconv.Itoa(part*1000),"1000")
+			if len(data.Response.Users) == 0 {
 				count++
 			}else {
 				for _, ID := range data.Response.Users {
@@ -49,34 +54,26 @@ func MathGroups(groups []string, membersMin, RequestUuid int) []int{
 			}
 		}
 
-		if(len(groups)==count){
+		if len(groups)==count {
 			break
 		}
 
 		part++
 	}
 
-	db := pg.Connect(&pg.Options{
-		User: "postgres",
-		Password: "411207",
-	})
-
+	listOfIds := list.New()
 	for ID,data := range fullData{
-		if(data >= membersMin){
-			realID, _ := strconv.Atoi(ID)
-			answerData = append(answerData,realID)
-			result1 := &models.Result{
-				ResultId: data_access.ReadRequest(db,int64(RequestUuid)),
-				RequestUuid: RequestUuid,
-				Id: int64(realID),
+		if data >= membersMin {
+			result := &models.Result{
+				RequestUuid: uuid,
+				Id: ID,
 				AddedAt: time.Now(),
 			}
-
-			data_access.InsertResult(db, result1)
+			listOfIds.PushBack(result)
 		}
 	}
 
-	return answerData
+	return listOfIds
 }
 
 func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{

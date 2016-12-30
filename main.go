@@ -1,15 +1,30 @@
 package main
 
 import (
-	"./utils"
-	"./vkutils"
-	"runtime"
-	"log"
+	_"upper.io/db.v2/postgresql"
+	"upper.io/db.v2/postgresql"
 )
 
 func main() {
+	var settings = postgresql.ConnectionURL{
+		Host:     "127.0.0.1:5432",
+		User:     "postgres",
+		Password: "411207",
+	}
+	sess, err := postgresql.Open(settings)
+	if err != nil {
 
-	runtime.GOMAXPROCS(utils.LoadConfiguration().CountGoroutine)
-	log.Println(len(vkutils.MathGroups([]string{"atpiska", "59469600"},2,1000)))
-	//log.Println(len(vkutils.MathGroups([]string{"31038184", "84519497", "59469600", "41462125", "39243732", "38624893", "1583008", "122102264", "72495085", "132582396", "46453123", "77521", "128423865", "40874838", "131346257", "63708206", "84734062", "30666517", "20629724", "24363586", "6149482", "109964404", "55671937", "11283947", "36169786", "54530371", "129109230", "99179177", "26514297", "67907640", "76522951", "11072550", "16777155"},33,1000,20)))
+	}
+	queries := []string{
+		`CREATE TABLE users (user_uuid  uuid, key text, name  text)`,
+		`CREATE TABLE results (result_id serial, request_uuid uuid, id text, added_at timestamp)`,
+		`CREATE TABLE requests (request_uuid uuid, user_uuid uuid, type_request integer, created_at timestamp, status integer, params text)`,
+	}
+
+	for _, q := range queries {
+		_, err := sess.Exec(q)
+		if err != nil {
+
+		}
+	}
 }
