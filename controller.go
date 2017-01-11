@@ -17,6 +17,8 @@ import (
 	"github.com/gammazero/workerpool"
 	"os"
 	"container/list"
+
+	_"github.com/lib/pq"
 )
 
 type IntersectId struct {
@@ -45,14 +47,19 @@ func main() {
 
 	configuration := utils.LoadConfiguration()
 	num_goroutines = configuration.CountGoroutine
-	var settings = postgresql.ConnectionURL{
-		Host:     configuration.Host,
-		User:     configuration.User,
-		Password: configuration.Password,
+
+	var settings,errs = postgresql.ParseURL(os.Getenv("DATABASE_URL"))
+
+	if errs != nil {
+		log.Fatalf("Error opening database: %q", err)
 	}
 
 	wp = workerpool.New(num_goroutines)
-	sess, _ = postgresql.Open(settings)
+	sess, err = postgresql.Open(settings)
+
+	if err != nil {
+		log.Fatalf("Error opening database: %q", err)
+	}
 
 	var requestsRemain []models.Request
 	results := sess.Collection("results")
@@ -75,7 +82,7 @@ func main() {
 	router.HandleFunc("/tsa/members_intersect", MembersIntersect)
 	router.HandleFunc("/tsa/get_result", GetResult)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), router))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
