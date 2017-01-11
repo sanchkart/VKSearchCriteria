@@ -1,11 +1,8 @@
 package models
 
-import (
-	"github.com/satori/go.uuid"
-)
 
 type User struct {
-	UserUuid	uuid.UUID
-	Key		string
-	Name		string
+	UserUuid	string  `db:"user_uuid" json:"user_uuid"`
+	KeyAuth		string  `db:"keyauth" json:"keyauth"`
+	Name		string  `db:"name" json:"name"`
 }

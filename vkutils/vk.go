@@ -5,20 +5,20 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 	"../models"
 	"net/url"
 	"container/list"
-	"github.com/satori/go.uuid"
 )
 
 var api = &vk_api.Api{}
 
 type VKGroupIDData struct {
 	Response struct {
-			 Count int   `json:"count"`
-			 Users []int `json:"users"`
-		 } `json:"response"`
+		Count int   `json:"count"`
+		Users []int `json:"users"`
+	} `json:"response"`
 }
 
 type VKUserData struct {
@@ -30,8 +30,9 @@ type VKUserData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin int, auth string,uuid uuid.UUID) *list.List{
+func MathGroups(groups []string, membersMin int, auth string,uuid string) (*list.List,models.Status){
 	var fullData = make(map[string]int)
+	listOfIds := list.New()
 
 	part := 0
 
@@ -44,7 +45,10 @@ func MathGroups(groups []string, membersMin int, auth string,uuid uuid.UUID) *li
 				log.Fatal(err)
 			}
 			urlPath := url.Path[1:len(url.Path)]
-			data := GetVKGroupIDs(urlPath,"id_asc",strconv.Itoa(part*1000),"1000")
+			data,flag := GetVKGroupIDs(urlPath,"id_asc",strconv.Itoa(part*1000),"1000")
+			if(!flag){
+				return listOfIds,models.ERROR
+			}
 			if len(data.Response.Users) == 0 {
 				count++
 			}else {
@@ -61,7 +65,6 @@ func MathGroups(groups []string, membersMin int, auth string,uuid uuid.UUID) *li
 		part++
 	}
 
-	listOfIds := list.New()
 	for ID,data := range fullData{
 		if data >= membersMin {
 			result := &models.Result{
@@ -70,13 +73,14 @@ func MathGroups(groups []string, membersMin int, auth string,uuid uuid.UUID) *li
 				AddedAt: time.Now(),
 			}
 			listOfIds.PushBack(result)
+			log.Println(ID)
 		}
 	}
 
-	return listOfIds
+	return listOfIds,models.DONE
 }
 
-func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
+func GetVKGroupIDs(groupID,sort,offset,count string) (VKGroupIDData,bool){
 	params := make(map[string]string)
 	params["group_id"] = groupID
 	params["sort"] = sort
@@ -88,13 +92,21 @@ func GetVKGroupIDs(groupID,sort,offset,count string) VKGroupIDData{
 		panic(err)
 	}
 
+
 	var data VKGroupIDData
 
-	if err := json.Unmarshal([]byte(strResp),&data); err != nil {
-		log.Println("Parsing VK GetMembers error:", err.Error())
+	if(strings.Index(strResp,"error")==-1){
+
+		if err := json.Unmarshal([]byte(strResp),&data); err != nil {
+			log.Println("Parsing VK GetMembers error:", err.Error())
+		}
+
+		return data,true
+	}else{
+		return data,false
 	}
 
-	return data
+
 }
 
 func GetVKUser(userID string) VKUserData{
