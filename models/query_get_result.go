@@ -1,7 +1,7 @@
 package models
 
 type QueryGetResult struct {
-	Auth  string `json:"auth"`
+	Auth      string `json:"auth"`
 	RequestId string `json:"request_id"`
-	Offset int `json:"offset"`
+	Offset    int    `json:"offset"`
 }

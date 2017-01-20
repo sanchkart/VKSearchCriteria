@@ -9,10 +9,10 @@ import (
 type Status string
 
 const (
-	PROCESSING  Status = "PROCESSING"
-	DONE  Status = "DONE"
-	CANCELLED Status = "CANCELLED"
-	ERROR Status = "ERROR"
+	PROCESSING Status = "PROCESSING"
+	DONE       Status = "DONE"
+	CANCELLED  Status = "CANCELLED"
+	ERROR      Status = "ERROR"
 )
 
 func (g *Status) Scan(src interface{}) error {
@@ -24,4 +24,4 @@ func (g *Status) Scan(src interface{}) error {
 	return nil
 }
 
-func (u Status) Value() (driver.Value, error)  { return string(u), nil }
+func (u Status) Value() (driver.Value, error) { return string(u), nil }

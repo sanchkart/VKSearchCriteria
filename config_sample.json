@@ -1,0 +1,12 @@
+{
+  "ServicePort": 4444,
+  "Host":"127.0.0.1:6432",
+  "Db":"brotarget",
+  "User":"btarget",
+  "Password":"123456",
+  "CountGoroutine" : 3,
+  "Tokens": [
+    "acyUk7haPmIMFMsiA5OB",
+    "acyUk7haPmIMFMsiA5OB"
+  ]
+}

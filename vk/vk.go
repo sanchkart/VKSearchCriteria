@@ -1,15 +1,16 @@
-package vkutils
+package vk
 
 import (
-	"github.com/yanple/vk_api"
+	"container/list"
 	"encoding/json"
+	"github.com/yanple/vk_api"
 	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
-	"../models"
-	"net/url"
-	"container/list"
+
+	"vkbackend/models"
 )
 
 var api = &vk_api.Api{}
@@ -43,64 +44,64 @@ type VKGroupData struct {
 	} `json:"response"`
 }
 
-func MathGroups(groups []string, membersMin int, auth string,uuid string) (*list.List,models.Status){
+func MathGroups(groups []string, membersMin int, auth string, uuid string) (*list.List, models.Status) {
 	var fullData = make(map[string]int)
 	listOfIds := list.New()
 
 	part := 0
 
-	for{
+	for {
 		count := 0
 
-		for _,name := range groups {
+		for _, name := range groups {
 			url, err := url.Parse(name)
 			if err != nil {
 				log.Fatal(err)
 			}
 			urlPath := url.Path[1:len(url.Path)]
 
-			urlPath,flag := GetIDGroup(urlPath)
+			urlPath, flag := GetIDGroup(urlPath)
 
-			if(!flag){
-				return listOfIds,models.ERROR
+			if !flag {
+				return listOfIds, models.ERROR
 			}
 
-			data,flag := GetVKGroupIDs(urlPath,"id_asc",strconv.Itoa(part*1000),"1000")
-			if(!flag){
-				return listOfIds,models.ERROR
+			data, flag := GetVKGroupIDs(urlPath, "id_asc", strconv.Itoa(part*1000), "1000")
+			if !flag {
+				return listOfIds, models.ERROR
 			}
 			if len(data.Response.Users) == 0 {
 				count++
-			}else {
+			} else {
 				for _, ID := range data.Response.Users {
 					fullData[strconv.Itoa(ID)]++
 				}
 			}
 		}
 
-		if len(groups)==count {
+		if len(groups) == count {
 			break
 		}
 
 		part++
 	}
 
-	for ID,data := range fullData{
+	for ID, data := range fullData {
 		if data >= membersMin {
 			result := &models.Result{
 				RequestUuid: uuid,
-				Id: ID,
-				AddedAt: time.Now(),
+				Id:          ID,
+				AddedAt:     time.Now(),
 			}
 			listOfIds.PushBack(result)
-			log.Println(ID)
+			log.Printf("found user: %v", ID)
 		}
 	}
 
-	return listOfIds,models.DONE
+	return listOfIds, models.DONE
 }
 
-func GetVKGroupIDs(groupID,sort,offset,count string) (VKGroupIDData,bool){
+func GetVKGroupIDs(groupID, sort, offset, count string) (VKGroupIDData, bool) {
 	params := make(map[string]string)
 	params["group_id"] = groupID
 	params["sort"] = sort
@@ -112,24 +113,22 @@ func GetVKGroupIDs(groupID,sort,offset,count string) (VKGroupIDData,bool){
 		panic(err)
 	}
 
-
 	var data VKGroupIDData
 
-	if(strings.Index(strResp,"\"error_code\":125")==-1){
+	if strings.Index(strResp, "\"error_code\":125") == -1 {
 
-		if err := json.Unmarshal([]byte(strResp),&data); err != nil {
+		if err := json.Unmarshal([]byte(strResp), &data); err != nil {
 			log.Println("Parsing VK GetMembers error:", err.Error())
 		}
 
-		return data,true
-	}else{
-		return data,false
+		return data, true
+	} else {
+		return data, false
 	}
-
 
 }
 
-func GetVKUser(userID string) VKUserData{
+func GetVKUser(userID string) VKUserData {
 	params := make(map[string]string)
 	params["user_ids"] = userID
 	params["fields"] = "sex"
@@ -141,14 +140,14 @@ func GetVKUser(userID string) VKUserData{
 
 	var data VKUserData
 
-	if err := json.Unmarshal([]byte(strResp),&data); err != nil {
+	if err := json.Unmarshal([]byte(strResp), &data); err != nil {
 		log.Println("Parsing VK UserGet error:", err.Error())
 	}
 
 	return data
 }
 
-func GetIDGroup(group string) (string, bool){
+func GetIDGroup(group string) (string, bool) {
 	params := make(map[string]string)
 	params["group_id"] = group
 
@@ -157,17 +156,15 @@ func GetIDGroup(group string) (string, bool){
 		panic(err)
 	}
 
-	if(strings.Index(strResp,"\"error_code\":100")!=-1) {
-		return "-1",false
+	if strings.Index(strResp, "\"error_code\":100") != -1 {
+		return "-1", false
 	}
 
 	var data VKGroupData
 
-	if err := json.Unmarshal([]byte(strResp),&data); err != nil {
+	if err := json.Unmarshal([]byte(strResp), &data); err != nil {
 		log.Println("Parsing VK GetByID error:", err.Error())
 	}
 
-	return strconv.Itoa(data.Response[0].Gid),true
+	return strconv.Itoa(data.Response[0].Gid), true
 }
-
-
